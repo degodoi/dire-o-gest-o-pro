@@ -20,7 +20,12 @@ const statusColors: Record<string, string> = {
   atrasada: "bg-destructive/20 text-destructive border-destructive/30",
 };
 
-const PAYMENT_METHODS = ["Dinheiro", "PIX", "Cartão de Crédito", "Cartão de Débito", "Boleto", "Transferência"];
+const PAYMENT_METHODS = [
+  { value: "dinheiro", label: "Dinheiro" },
+  { value: "pix", label: "PIX" },
+  { value: "cartao", label: "Cartão" },
+  { value: "boleto", label: "Boleto" },
+];
 
 type Payment = {
   id: string;
@@ -169,7 +174,7 @@ export default function FinanceiroParcelasTab() {
                 <Select value={payMethod} onValueChange={setPayMethod}>
                   <SelectTrigger className="bg-input/50"><SelectValue placeholder="Selecione" /></SelectTrigger>
                   <SelectContent>
-                    {PAYMENT_METHODS.map((m) => <SelectItem key={m} value={m}>{m}</SelectItem>)}
+                    {PAYMENT_METHODS.map((m) => <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
