@@ -9,6 +9,7 @@ interface AuthContextType {
   session: Session | null;
   user: User | null;
   role: AppRole | null;
+  roles: AppRole[];
   profile: Database["public"]["Tables"]["profiles"]["Row"] | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
@@ -21,16 +22,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [role, setRole] = useState<AppRole | null>(null);
+  const [roles, setRoles] = useState<AppRole[]>([]);
   const [profile, setProfile] = useState<Database["public"]["Tables"]["profiles"]["Row"] | null>(null);
   const [loading, setLoading] = useState(true);
 
   const fetchUserData = async (userId: string) => {
     try {
-      const [roleRes, profileRes] = await Promise.all([
-        supabase.rpc("get_user_role", { _user_id: userId }),
+      const [rolesRes, profileRes] = await Promise.all([
+        supabase.from("user_roles").select("role").eq("user_id", userId),
         supabase.from("profiles").select("*").eq("user_id", userId).single(),
       ]);
-      if (roleRes.data) setRole(roleRes.data);
+      const userRoles = (rolesRes.data ?? []).map((r: any) => r.role as AppRole);
+      setRoles(userRoles);
+      // Primary role: highest priority (admin > secretaria > instrutor)
+      const priority: AppRole[] = ["admin", "secretaria", "instrutor"];
+      setRole(priority.find((p) => userRoles.includes(p)) ?? null);
       if (profileRes.data) setProfile(profileRes.data);
     } catch (err) {
       console.error("Error fetching user data:", err);
@@ -74,11 +80,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setSession(null);
     setUser(null);
     setRole(null);
+    setRoles([]);
     setProfile(null);
   };
 
   return (
-    <AuthContext.Provider value={{ session, user, role, profile, loading, signIn, signOut }}>
+    <AuthContext.Provider value={{ session, user, role, roles, profile, loading, signIn, signOut }}>
       {children}
     </AuthContext.Provider>
   );
