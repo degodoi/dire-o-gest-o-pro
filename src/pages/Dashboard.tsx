@@ -8,22 +8,30 @@ export default function Dashboard() {
   const { data: stats, isLoading } = useQuery({
     queryKey: ["dashboard-stats"],
     queryFn: async () => {
-      const [employeesRes] = await Promise.all([
+      const [employeesRes, studentsRes, paymentsRes] = await Promise.all([
         supabase.from("employees").select("id, role, is_active"),
+        supabase.from("students").select("id, is_active"),
+        supabase.from("student_payments").select("amount, status, paid_date"),
       ]);
 
       const employees = employeesRes.data ?? [];
-      const activeInstructors = employees.filter(
-        (e: any) => e.role === "instrutor" && e.is_active
-      ).length;
-      const totalEmployees = employees.filter((e: any) => e.is_active).length;
+      const students = studentsRes.data ?? [];
+      const payments = paymentsRes.data ?? [];
+
+      const activeInstructors = employees.filter((e: any) => e.role === "instrutor" && e.is_active).length;
+      const totalAlunos = students.filter((s: any) => s.is_active).length;
+
+      const now = new Date();
+      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0, 10);
+      const receitaMes = payments
+        .filter((p: any) => p.status === "paga" && p.paid_date && p.paid_date >= monthStart)
+        .reduce((sum: number, p: any) => sum + Number(p.amount), 0);
 
       return {
-        totalAlunos: 0,
-        receitaMes: "R$ 0,00",
+        totalAlunos,
+        receitaMes: `R$ ${receitaMes.toFixed(2).replace(".", ",")}`,
         aulasAgendadas: 0,
         instrutoresAtivos: activeInstructors,
-        totalFuncionarios: totalEmployees,
       };
     },
   });
