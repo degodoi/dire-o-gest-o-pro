@@ -32,7 +32,7 @@ const navItems = [
 ];
 
 export function AppSidebar() {
-  const { signOut, profile, role } = useAuth();
+  const { signOut, profile, roles } = useAuth();
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
 
@@ -88,7 +88,9 @@ export function AppSidebar() {
             <p className="text-xs font-medium text-sidebar-foreground truncate">
               {profile.full_name || profile.email}
             </p>
-            <p className="text-[10px] text-muted-foreground capitalize">{role ?? ""}</p>
+            <p className="text-[10px] text-muted-foreground capitalize">
+              {roles.length > 0 ? roles.join(" · ") : ""}
+            </p>
           </div>
         )}
         <Button
