@@ -19,6 +19,6 @@ export default defineConfig(({ mode }) => ({
     },
   },
   optimizeDeps: {
-    include: ["react", "react-dom", "react-dom/client"],
+    include: ["react", "react-dom", "react-dom/client", "react/jsx-runtime"],
   },
 }));
