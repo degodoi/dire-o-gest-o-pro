@@ -119,6 +119,137 @@ export type Database = {
         }
         Relationships: []
       }
+      student_payments: {
+        Row: {
+          amount: number
+          created_at: string
+          due_date: string
+          id: string
+          installment_number: number
+          paid_date: string | null
+          payment_method: string | null
+          receipt_url: string | null
+          status: string
+          student_id: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          due_date: string
+          id?: string
+          installment_number: number
+          paid_date?: string | null
+          payment_method?: string | null
+          receipt_url?: string | null
+          status?: string
+          student_id: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          due_date?: string
+          id?: string
+          installment_number?: number
+          paid_date?: string | null
+          payment_method?: string | null
+          receipt_url?: string | null
+          status?: string
+          student_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_payments_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      students: {
+        Row: {
+          address_city: string | null
+          address_complement: string | null
+          address_neighborhood: string | null
+          address_number: string | null
+          address_state: string | null
+          address_street: string | null
+          address_zip: string | null
+          birth_date: string | null
+          category: string
+          course_value: number
+          cpf: string | null
+          created_at: string
+          email: string | null
+          enrollment_date: string
+          full_name: string
+          id: string
+          installments_count: number
+          is_active: boolean
+          notes: string | null
+          phone: string | null
+          photo_url: string | null
+          rg: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          address_city?: string | null
+          address_complement?: string | null
+          address_neighborhood?: string | null
+          address_number?: string | null
+          address_state?: string | null
+          address_street?: string | null
+          address_zip?: string | null
+          birth_date?: string | null
+          category?: string
+          course_value?: number
+          cpf?: string | null
+          created_at?: string
+          email?: string | null
+          enrollment_date?: string
+          full_name: string
+          id?: string
+          installments_count?: number
+          is_active?: boolean
+          notes?: string | null
+          phone?: string | null
+          photo_url?: string | null
+          rg?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          address_city?: string | null
+          address_complement?: string | null
+          address_neighborhood?: string | null
+          address_number?: string | null
+          address_state?: string | null
+          address_street?: string | null
+          address_zip?: string | null
+          birth_date?: string | null
+          category?: string
+          course_value?: number
+          cpf?: string | null
+          created_at?: string
+          email?: string | null
+          enrollment_date?: string
+          full_name?: string
+          id?: string
+          installments_count?: number
+          is_active?: boolean
+          notes?: string | null
+          phone?: string | null
+          photo_url?: string | null
+          rg?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           id: string
