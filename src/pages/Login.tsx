@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,8 +12,10 @@ import { Car, Eye, EyeOff, Loader2 } from "lucide-react";
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [fullName, setFullName] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(false);
   const { signIn } = useAuth();
   const navigate = useNavigate();
 
@@ -22,13 +25,41 @@ export default function Login() {
       toast({ title: "Preencha todos os campos", variant: "destructive" });
       return;
     }
+    if (isSignUp && !fullName.trim()) {
+      toast({ title: "Informe seu nome completo", variant: "destructive" });
+      return;
+    }
+    if (password.length < 6) {
+      toast({ title: "A senha deve ter pelo menos 6 caracteres", variant: "destructive" });
+      return;
+    }
+
     setIsLoading(true);
-    const { error } = await signIn(email.trim(), password);
-    setIsLoading(false);
-    if (error) {
-      toast({ title: "Erro ao entrar", description: "Email ou senha incorretos.", variant: "destructive" });
+
+    if (isSignUp) {
+      const { error } = await supabase.auth.signUp({
+        email: email.trim(),
+        password,
+        options: {
+          emailRedirectTo: window.location.origin,
+          data: { full_name: fullName.trim() },
+        },
+      });
+      setIsLoading(false);
+      if (error) {
+        toast({ title: "Erro ao cadastrar", description: error.message, variant: "destructive" });
+      } else {
+        toast({ title: "Conta criada com sucesso!", description: "Você já pode fazer login." });
+        setIsSignUp(false);
+      }
     } else {
-      navigate("/");
+      const { error } = await signIn(email.trim(), password);
+      setIsLoading(false);
+      if (error) {
+        toast({ title: "Erro ao entrar", description: "Email ou senha incorretos.", variant: "destructive" });
+      } else {
+        navigate("/");
+      }
     }
   };
 
@@ -50,6 +81,22 @@ export default function Login() {
         <Card className="border-border/50 bg-card/80 backdrop-blur-sm shadow-2xl">
           <CardContent className="pt-6 space-y-6">
             <form onSubmit={handleSubmit} className="space-y-5">
+              {isSignUp && (
+                <div className="space-y-2">
+                  <Label htmlFor="fullName" className="text-sm font-medium text-foreground">
+                    Nome Completo
+                  </Label>
+                  <Input
+                    id="fullName"
+                    type="text"
+                    placeholder="Seu nome completo"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    className="h-11 bg-input/50 border-border focus:border-primary"
+                  />
+                </div>
+              )}
+
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-sm font-medium text-foreground">
                   Email
@@ -77,7 +124,7 @@ export default function Login() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="h-11 bg-input/50 border-border focus:border-primary pr-10"
-                    autoComplete="current-password"
+                    autoComplete={isSignUp ? "new-password" : "current-password"}
                   />
                   <button
                     type="button"
@@ -90,12 +137,22 @@ export default function Login() {
               </div>
 
               <Button type="submit" className="w-full h-11 font-medium" disabled={isLoading}>
-                {isLoading ? (
-                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                ) : null}
-                {isLoading ? "Entrando..." : "Entrar"}
+                {isLoading && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
+                {isLoading
+                  ? isSignUp ? "Cadastrando..." : "Entrando..."
+                  : isSignUp ? "Criar Conta" : "Entrar"}
               </Button>
             </form>
+
+            <div className="text-center">
+              <button
+                type="button"
+                onClick={() => setIsSignUp(!isSignUp)}
+                className="text-sm text-primary hover:underline"
+              >
+                {isSignUp ? "Já tem conta? Fazer login" : "Primeiro acesso? Criar conta"}
+              </button>
+            </div>
           </CardContent>
         </Card>
 
