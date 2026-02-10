@@ -14,6 +14,78 @@ export type Database = {
   }
   public: {
     Tables: {
+      employees: {
+        Row: {
+          address_city: string | null
+          address_complement: string | null
+          address_neighborhood: string | null
+          address_number: string | null
+          address_state: string | null
+          address_street: string | null
+          address_zip: string | null
+          birth_date: string | null
+          cpf: string | null
+          created_at: string
+          email: string | null
+          full_name: string
+          hire_date: string | null
+          id: string
+          is_active: boolean
+          phone: string | null
+          photo_url: string | null
+          rg: string | null
+          role: Database["public"]["Enums"]["app_role"]
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          address_city?: string | null
+          address_complement?: string | null
+          address_neighborhood?: string | null
+          address_number?: string | null
+          address_state?: string | null
+          address_street?: string | null
+          address_zip?: string | null
+          birth_date?: string | null
+          cpf?: string | null
+          created_at?: string
+          email?: string | null
+          full_name: string
+          hire_date?: string | null
+          id?: string
+          is_active?: boolean
+          phone?: string | null
+          photo_url?: string | null
+          rg?: string | null
+          role?: Database["public"]["Enums"]["app_role"]
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          address_city?: string | null
+          address_complement?: string | null
+          address_neighborhood?: string | null
+          address_number?: string | null
+          address_state?: string | null
+          address_street?: string | null
+          address_zip?: string | null
+          birth_date?: string | null
+          cpf?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string
+          hire_date?: string | null
+          id?: string
+          is_active?: boolean
+          phone?: string | null
+          photo_url?: string | null
+          rg?: string | null
+          role?: Database["public"]["Enums"]["app_role"]
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null

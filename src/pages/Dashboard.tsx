@@ -1,14 +1,40 @@
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, GraduationCap, DollarSign, CalendarDays } from "lucide-react";
-
-const stats = [
-  { label: "Total de Alunos", value: "0", icon: GraduationCap, color: "text-primary" },
-  { label: "Receita do Mês", value: "R$ 0,00", icon: DollarSign, color: "text-success" },
-  { label: "Aulas Agendadas", value: "0", icon: CalendarDays, color: "text-warning" },
-  { label: "Instrutores Ativos", value: "0", icon: Users, color: "text-primary" },
-];
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Dashboard() {
+  const { data: stats, isLoading } = useQuery({
+    queryKey: ["dashboard-stats"],
+    queryFn: async () => {
+      const [employeesRes] = await Promise.all([
+        supabase.from("employees").select("id, role, is_active"),
+      ]);
+
+      const employees = employeesRes.data ?? [];
+      const activeInstructors = employees.filter(
+        (e: any) => e.role === "instrutor" && e.is_active
+      ).length;
+      const totalEmployees = employees.filter((e: any) => e.is_active).length;
+
+      return {
+        totalAlunos: 0,
+        receitaMes: "R$ 0,00",
+        aulasAgendadas: 0,
+        instrutoresAtivos: activeInstructors,
+        totalFuncionarios: totalEmployees,
+      };
+    },
+  });
+
+  const cards = [
+    { label: "Total de Alunos", value: stats?.totalAlunos ?? 0, icon: GraduationCap, color: "text-primary" },
+    { label: "Receita do Mês", value: stats?.receitaMes ?? "R$ 0,00", icon: DollarSign, color: "text-success" },
+    { label: "Aulas Agendadas", value: stats?.aulasAgendadas ?? 0, icon: CalendarDays, color: "text-warning" },
+    { label: "Instrutores Ativos", value: stats?.instrutoresAtivos ?? 0, icon: Users, color: "text-primary" },
+  ];
+
   return (
     <div className="space-y-6">
       <div>
@@ -17,7 +43,7 @@ export default function Dashboard() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {stats.map((stat) => (
+        {cards.map((stat) => (
           <Card key={stat.label} className="bg-card border-border/50">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -26,7 +52,13 @@ export default function Dashboard() {
               <stat.icon className={`w-5 h-5 ${stat.color}`} />
             </CardHeader>
             <CardContent>
-              <p className="text-2xl font-display font-bold text-foreground">{stat.value}</p>
+              {isLoading ? (
+                <Skeleton className="h-8 w-20" />
+              ) : (
+                <p className="text-2xl font-display font-bold text-foreground">
+                  {String(stat.value)}
+                </p>
+              )}
             </CardContent>
           </Card>
         ))}
