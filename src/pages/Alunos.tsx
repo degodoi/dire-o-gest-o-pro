@@ -161,10 +161,10 @@ export default function Alunos() {
         </Card>
       ) : (
         <div className="space-y-2">
-          {filtered.map((student) => (
-            <Card key={student.id} className="bg-card border-border/50 hover:border-border transition-colors">
+          {filtered.map((student, i) => (
+            <Card key={student.id} className="bg-card border-border/50 hover:border-border hover-lift transition-all animate-slide-up" style={{ animationDelay: `${i * 0.04}s`, animationFillMode: 'both' }}>
               <CardContent className="p-4 flex items-center gap-4">
-                <div className="w-11 h-11 rounded-full bg-accent flex items-center justify-center overflow-hidden shrink-0">
+                <div className="w-11 h-11 rounded-full bg-accent flex items-center justify-center overflow-hidden shrink-0 ring-2 ring-border/30">
                   {student.photo_url ? (
                     <img src={student.photo_url} alt="" className="w-full h-full object-cover" />
                   ) : (
@@ -180,11 +180,11 @@ export default function Alunos() {
                   {statusLabels[student.status] ?? student.status}
                 </Badge>
                 <div className="flex gap-1">
-                  <Button variant="ghost" size="icon" onClick={() => setViewingStudent(student)}><Eye className="w-4 h-4" /></Button>
-                  <Button variant="ghost" size="icon" onClick={() => { setEditingStudent(student); setIsFormOpen(true); }}><Pencil className="w-4 h-4" /></Button>
+                  <Button variant="ghost" size="icon" onClick={() => setViewingStudent(student)} className="hover:bg-primary/10 hover:text-primary transition-colors"><Eye className="w-4 h-4" /></Button>
+                  <Button variant="ghost" size="icon" onClick={() => { setEditingStudent(student); setIsFormOpen(true); }} className="hover:bg-primary/10 hover:text-primary transition-colors"><Pencil className="w-4 h-4" /></Button>
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive"><Trash2 className="w-4 h-4" /></Button>
+                      <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive hover:bg-destructive/10 transition-colors"><Trash2 className="w-4 h-4" /></Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>

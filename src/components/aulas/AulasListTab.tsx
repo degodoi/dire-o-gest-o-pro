@@ -139,8 +139,8 @@ export default function AulasListTab() {
         </Card>
       ) : (
         <div className="space-y-2">
-          {filtered.map((l) => (
-            <div key={l.id} className="flex items-center justify-between py-3 px-4 rounded-lg bg-card border border-border/50 hover:border-border transition-colors">
+          {filtered.map((l, i) => (
+            <div key={l.id} className="flex items-center justify-between py-3 px-4 rounded-lg bg-card border border-border/50 hover:border-border hover-lift transition-all animate-slide-up" style={{ animationDelay: `${i * 0.04}s`, animationFillMode: 'both' }}>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
                   <p className="text-sm font-medium text-foreground truncate">

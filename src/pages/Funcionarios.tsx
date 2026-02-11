@@ -191,11 +191,11 @@ export default function Funcionarios() {
         </Card>
       ) : (
         <div className="space-y-2">
-          {filtered.map((emp) => (
-            <Card key={emp.id} className="bg-card border-border/50 hover:border-border transition-colors">
+          {filtered.map((emp, i) => (
+            <Card key={emp.id} className="bg-card border-border/50 hover:border-border hover-lift transition-all animate-slide-up" style={{ animationDelay: `${i * 0.04}s`, animationFillMode: 'both' }}>
               <CardContent className="p-4 flex items-center gap-4">
                 {/* Photo */}
-                <div className="w-11 h-11 rounded-full bg-accent flex items-center justify-center overflow-hidden shrink-0">
+                <div className="w-11 h-11 rounded-full bg-accent flex items-center justify-center overflow-hidden shrink-0 ring-2 ring-border/30">
                   {emp.photo_url ? (
                     <img src={emp.photo_url} alt="" className="w-full h-full object-cover" />
                   ) : (
@@ -224,15 +224,15 @@ export default function Funcionarios() {
 
                 {/* Actions */}
                 <div className="flex gap-1">
-                  <Button variant="ghost" size="icon" onClick={() => setViewingEmployee(emp)}>
+                  <Button variant="ghost" size="icon" onClick={() => setViewingEmployee(emp)} className="hover:bg-primary/10 hover:text-primary transition-colors">
                     <Eye className="w-4 h-4" />
                   </Button>
-                  <Button variant="ghost" size="icon" onClick={() => handleEdit(emp)}>
+                  <Button variant="ghost" size="icon" onClick={() => handleEdit(emp)} className="hover:bg-primary/10 hover:text-primary transition-colors">
                     <Pencil className="w-4 h-4" />
                   </Button>
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
+                      <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive hover:bg-destructive/10 transition-colors">
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </AlertDialogTrigger>

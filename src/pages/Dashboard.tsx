@@ -53,8 +53,8 @@ export default function Dashboard() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {cards.map((stat) => (
-          <Card key={stat.label} className="bg-card border-border/50">
+        {cards.map((stat, i) => (
+          <Card key={stat.label} className="bg-card border-border/50 hover-lift animate-slide-up" style={{ animationDelay: `${i * 0.08}s`, animationFillMode: 'both' }}>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 {stat.label}
