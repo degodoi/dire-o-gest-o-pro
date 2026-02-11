@@ -11,7 +11,7 @@ export default function AppLayout() {
           <header className="h-14 flex items-center gap-4 border-b border-border px-4 bg-background/80 backdrop-blur-sm sticky top-0 z-10">
             <SidebarTrigger />
           </header>
-          <main className="flex-1 p-6">
+          <main className="flex-1 p-4 sm:p-6 animate-fade-in">
             <Outlet />
           </main>
         </div>
