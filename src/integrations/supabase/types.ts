@@ -86,6 +86,66 @@ export type Database = {
         }
         Relationships: []
       }
+      lessons: {
+        Row: {
+          created_at: string
+          date: string
+          duration_minutes: number
+          id: string
+          instructor_id: string
+          notes: string | null
+          start_time: string
+          status: string
+          student_id: string
+          type: string
+          updated_at: string
+          value: number
+        }
+        Insert: {
+          created_at?: string
+          date?: string
+          duration_minutes?: number
+          id?: string
+          instructor_id: string
+          notes?: string | null
+          start_time: string
+          status?: string
+          student_id: string
+          type?: string
+          updated_at?: string
+          value?: number
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          duration_minutes?: number
+          id?: string
+          instructor_id?: string
+          notes?: string | null
+          start_time?: string
+          status?: string
+          student_id?: string
+          type?: string
+          updated_at?: string
+          value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lessons_instructor_id_fkey"
+            columns: ["instructor_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lessons_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null

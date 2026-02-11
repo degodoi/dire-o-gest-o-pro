@@ -8,14 +8,16 @@ export default function Dashboard() {
   const { data: stats, isLoading } = useQuery({
     queryKey: ["dashboard-stats"],
     queryFn: async () => {
-      const [employeesRes, studentsRes, paymentsRes] = await Promise.all([
+      const [employeesRes, studentsRes, paymentsRes, lessonsRes] = await Promise.all([
         supabase.from("employees").select("id, role, is_active"),
         supabase.from("students").select("id, is_active"),
         supabase.from("student_payments").select("amount, status, paid_date"),
+        supabase.from("lessons").select("id, status").eq("status", "agendada"),
       ]);
 
       const employees = employeesRes.data ?? [];
       const students = studentsRes.data ?? [];
+      const lessons = lessonsRes.data ?? [];
       const payments = paymentsRes.data ?? [];
 
       const activeInstructors = employees.filter((e: any) => e.role === "instrutor" && e.is_active).length;
@@ -30,7 +32,7 @@ export default function Dashboard() {
       return {
         totalAlunos,
         receitaMes: `R$ ${receitaMes.toFixed(2).replace(".", ",")}`,
-        aulasAgendadas: 0,
+        aulasAgendadas: lessons.length,
         instrutoresAtivos: activeInstructors,
       };
     },
