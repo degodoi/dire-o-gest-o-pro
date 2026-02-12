@@ -14,8 +14,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/hooks/use-toast";
 import {
   DollarSign, TrendingUp, TrendingDown, Wallet,
-  Plus, Search, Filter, CreditCard, CheckCircle2,
+  Plus, Search, Filter, CreditCard, CheckCircle2, Trash2,
 } from "lucide-react";
+import AdminPasswordDialog from "@/components/AdminPasswordDialog";
+import { useAuth } from "@/contexts/AuthContext";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import {
@@ -249,6 +251,8 @@ function MovimentacoesTab() {
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [formOpen, setFormOpen] = useState(false);
   const [editTx, setEditTx] = useState<Transaction | null>(null);
+  const [deletingTx, setDeletingTx] = useState<Transaction | null>(null);
+  const { role } = useAuth();
   const queryClient = useQueryClient();
 
   const { data: transactions = [], isLoading } = useQuery({
@@ -345,16 +349,36 @@ function MovimentacoesTab() {
                   </div>
                 </div>
               </div>
-              <div className="text-right shrink-0 ml-4">
-                <p className={`text-sm font-semibold ${t.type === "receita" ? "text-success" : "text-destructive"}`}>
-                  {t.type === "receita" ? "+" : "-"} R$ {Number(t.amount).toFixed(2).replace(".", ",")}
-                </p>
-                <p className="text-[10px] text-muted-foreground">{new Date(t.date + "T00:00:00").toLocaleDateString("pt-BR")}</p>
+              <div className="flex items-center gap-2 shrink-0 ml-4">
+                <div className="text-right">
+                  <p className={`text-sm font-semibold ${t.type === "receita" ? "text-success" : "text-destructive"}`}>
+                    {t.type === "receita" ? "+" : "-"} R$ {Number(t.amount).toFixed(2).replace(".", ",")}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground">{new Date(t.date + "T00:00:00").toLocaleDateString("pt-BR")}</p>
+                </div>
+                {role === "admin" && (
+                  <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10" onClick={() => setDeletingTx(t)}>
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                )}
               </div>
             </div>
           ))}
         </div>
       )}
+
+      <AdminPasswordDialog
+        open={!!deletingTx}
+        onOpenChange={(v) => !v && setDeletingTx(null)}
+        title="Excluir movimentação?"
+        description={`Deseja excluir "${deletingTx?.description || deletingTx?.category}" no valor de R$ ${Number(deletingTx?.amount || 0).toFixed(2).replace(".", ",")}?`}
+        onConfirm={async () => {
+          if (deletingTx) {
+            await deleteMutation.mutateAsync(deletingTx.id);
+            setDeletingTx(null);
+          }
+        }}
+      />
     </div>
   );
 }
