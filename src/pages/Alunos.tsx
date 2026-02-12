@@ -11,15 +11,13 @@ import {
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
-  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import { toast } from "@/hooks/use-toast";
 import { Plus, Search, Pencil, Trash2, Eye, Loader2, GraduationCap } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import StudentForm from "@/components/students/StudentForm";
 import StudentDetail from "@/components/students/StudentDetail";
+import AdminPasswordDialog from "@/components/AdminPasswordDialog";
+import { useAuth } from "@/contexts/AuthContext";
 
 export type Student = {
   id: string;
@@ -64,12 +62,14 @@ const statusColors: Record<string, string> = {
 
 export default function Alunos() {
   const queryClient = useQueryClient();
+  const { role } = useAuth();
   const [search, setSearch] = useState("");
   const [filterCategory, setFilterCategory] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingStudent, setEditingStudent] = useState<Student | null>(null);
   const [viewingStudent, setViewingStudent] = useState<Student | null>(null);
+  const [deletingStudent, setDeletingStudent] = useState<Student | null>(null);
 
   const { data: students = [], isLoading } = useQuery({
     queryKey: ["students"],
@@ -182,25 +182,11 @@ export default function Alunos() {
                 <div className="flex gap-1">
                   <Button variant="ghost" size="icon" onClick={() => setViewingStudent(student)} className="hover:bg-primary/10 hover:text-primary transition-colors"><Eye className="w-4 h-4" /></Button>
                   <Button variant="ghost" size="icon" onClick={() => { setEditingStudent(student); setIsFormOpen(true); }} className="hover:bg-primary/10 hover:text-primary transition-colors"><Pencil className="w-4 h-4" /></Button>
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive hover:bg-destructive/10 transition-colors"><Trash2 className="w-4 h-4" /></Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Excluir aluno?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          Tem certeza que deseja excluir <strong>{student.full_name}</strong>? Todas as parcelas vinculadas também serão removidas.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => deleteMutation.mutate(student.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                          {deleteMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : "Excluir"}
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
+                  {role === "admin" && (
+                    <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive hover:bg-destructive/10 transition-colors" onClick={() => setDeletingStudent(student)}>
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -225,6 +211,18 @@ export default function Alunos() {
           {viewingStudent && <StudentDetail student={viewingStudent} />}
         </DialogContent>
       </Dialog>
+      <AdminPasswordDialog
+        open={!!deletingStudent}
+        onOpenChange={(v) => !v && setDeletingStudent(null)}
+        title="Excluir aluno?"
+        description={`Tem certeza que deseja excluir ${deletingStudent?.full_name}? Todas as parcelas vinculadas também serão removidas.`}
+        onConfirm={async () => {
+          if (deletingStudent) {
+            await deleteMutation.mutateAsync(deletingStudent.id);
+            setDeletingStudent(null);
+          }
+        }}
+      />
     </div>
   );
 }

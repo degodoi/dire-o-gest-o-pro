@@ -9,8 +9,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/hooks/use-toast";
-import { Plus, Search, Filter, CalendarDays, CheckCircle2, XCircle, RefreshCw } from "lucide-react";
+import { Plus, Search, Filter, CalendarDays, CheckCircle2, XCircle, Trash2, CalendarClock } from "lucide-react";
 import LessonForm from "@/components/aulas/LessonForm";
+import AdminPasswordDialog from "@/components/AdminPasswordDialog";
+import { useAuth } from "@/contexts/AuthContext";
+import { Label } from "@/components/ui/label";
 
 const statusLabels: Record<string, string> = {
   agendada: "Agendada", realizada: "Realizada", cancelada: "Cancelada", reagendada: "Reagendada",
@@ -44,6 +47,12 @@ export default function AulasListTab() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [formOpen, setFormOpen] = useState(false);
   const [editLesson, setEditLesson] = useState<Lesson | null>(null);
+  const [deletingLesson, setDeletingLesson] = useState<Lesson | null>(null);
+  const [reschedulingLesson, setReschedulingLesson] = useState<Lesson | null>(null);
+  const [rescheduleDate, setRescheduleDate] = useState("");
+  const [rescheduleTime, setRescheduleTime] = useState("");
+  const [reschedulePasswordOpen, setReschedulePasswordOpen] = useState(false);
+  const { role } = useAuth();
   const queryClient = useQueryClient();
 
   const { data: lessons = [], isLoading } = useQuery({
@@ -71,6 +80,38 @@ export default function AulasListTab() {
     },
     onError: (err: any) => toast({ title: "Erro", description: err.message, variant: "destructive" }),
   });
+
+  const deleteLessonMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("lessons").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["lessons"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] });
+      toast({ title: "Aula excluída com sucesso" });
+    },
+    onError: () => toast({ title: "Erro ao excluir aula", variant: "destructive" }),
+  });
+
+  const rescheduleLessonMutation = useMutation({
+    mutationFn: async ({ id, date, time }: { id: string; date: string; time: string }) => {
+      const { error } = await supabase.from("lessons").update({ date, start_time: time, status: "reagendada" }).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["lessons"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] });
+      toast({ title: "Aula reagendada com sucesso" });
+    },
+    onError: (err: any) => toast({ title: "Erro", description: err.message, variant: "destructive" }),
+  });
+
+  const openReschedule = (lesson: Lesson) => {
+    setReschedulingLesson(lesson);
+    setRescheduleDate(lesson.date);
+    setRescheduleTime(lesson.start_time.slice(0, 5));
+  };
 
   const filtered = lessons.filter((l) => {
     const instrName = (l.employees as any)?.full_name?.toLowerCase() || "";
@@ -166,17 +207,92 @@ export default function AulasListTab() {
                       onClick={() => updateStatusMutation.mutate({ id: l.id, status: "realizada" })}>
                       <CheckCircle2 className="w-4 h-4" />
                     </Button>
+                    <Button size="icon" variant="ghost" className="h-7 w-7 text-warning hover:text-warning" title="Reagendar"
+                      onClick={() => openReschedule(l)}>
+                      <CalendarClock className="w-4 h-4" />
+                    </Button>
                     <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive hover:text-destructive" title="Cancelar"
                       onClick={() => updateStatusMutation.mutate({ id: l.id, status: "cancelada" })}>
                       <XCircle className="w-4 h-4" />
                     </Button>
                   </div>
                 )}
+                {role === "admin" && (
+                  <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10" title="Excluir aula"
+                    onClick={() => setDeletingLesson(l)}>
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                )}
               </div>
             </div>
           ))}
         </div>
       )}
+      {/* Delete lesson dialog */}
+      <AdminPasswordDialog
+        open={!!deletingLesson}
+        onOpenChange={(v) => !v && setDeletingLesson(null)}
+        title="Excluir aula?"
+        description={`Deseja excluir a aula de ${(deletingLesson?.students as any)?.full_name || "—"} em ${deletingLesson ? fmtDate(deletingLesson.date) : ""}?`}
+        onConfirm={async () => {
+          if (deletingLesson) {
+            await deleteLessonMutation.mutateAsync(deletingLesson.id);
+            setDeletingLesson(null);
+          }
+        }}
+      />
+
+      {/* Reschedule dialog */}
+      <Dialog open={!!reschedulingLesson} onOpenChange={(v) => { if (!v) setReschedulingLesson(null); }}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Reagendar Aula</DialogTitle>
+          </DialogHeader>
+          {reschedulingLesson && (
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                Aluno: {(reschedulingLesson.students as any)?.full_name || "—"}
+              </p>
+              <div className="space-y-2">
+                <Label>Nova Data</Label>
+                <Input type="date" value={rescheduleDate} onChange={(e) => setRescheduleDate(e.target.value)} className="bg-input/50" />
+              </div>
+              <div className="space-y-2">
+                <Label>Novo Horário</Label>
+                <Input type="time" value={rescheduleTime} onChange={(e) => setRescheduleTime(e.target.value)} className="bg-input/50" />
+              </div>
+              <Button
+                className="w-full"
+                disabled={!rescheduleDate || !rescheduleTime}
+                onClick={() => {
+                  setReschedulePasswordOpen(true);
+                }}
+              >
+                Confirmar Reagendamento
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <AdminPasswordDialog
+        open={reschedulePasswordOpen}
+        onOpenChange={(v) => !v && setReschedulePasswordOpen(false)}
+        title="Confirmar reagendamento"
+        description={`Reagendar aula para ${rescheduleDate ? new Date(rescheduleDate + "T00:00:00").toLocaleDateString("pt-BR") : ""} às ${rescheduleTime}?`}
+        destructive={false}
+        onConfirm={async () => {
+          if (reschedulingLesson) {
+            await rescheduleLessonMutation.mutateAsync({
+              id: reschedulingLesson.id,
+              date: rescheduleDate,
+              time: rescheduleTime,
+            });
+            setReschedulingLesson(null);
+            setReschedulePasswordOpen(false);
+          }
+        }}
+      />
     </div>
   );
 }
