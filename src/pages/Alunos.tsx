@@ -85,6 +85,13 @@ export default function Alunos() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
+      // Delete related lessons first
+      const { error: lessonsErr } = await supabase.from("lessons").delete().eq("student_id", id);
+      if (lessonsErr) throw lessonsErr;
+      // Delete related payments
+      const { error: paymentsErr } = await supabase.from("student_payments").delete().eq("student_id", id);
+      if (paymentsErr) throw paymentsErr;
+      // Now delete the student
       const { error } = await supabase.from("students").delete().eq("id", id);
       if (error) throw error;
     },
