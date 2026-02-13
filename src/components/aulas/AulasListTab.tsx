@@ -24,7 +24,7 @@ const statusColors: Record<string, string> = {
   cancelada: "bg-destructive/20 text-destructive border-destructive/30",
   reagendada: "bg-warning/20 text-warning border-warning/30",
 };
-const typeLabels: Record<string, string> = { pratica: "Prática", prova: "Prova" };
+const typeLabels: Record<string, string> = { pratica_a: "Prática A (Moto)", pratica_b: "Prática B (Carro)", exame_a: "Exame A (Moto)", exame_b: "Exame B (Carro)", pratica: "Prática", prova: "Prova" };
 
 export type Lesson = {
   id: string;

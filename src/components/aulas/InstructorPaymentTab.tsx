@@ -42,8 +42,10 @@ export default function InstructorPaymentTab() {
       // Group by instructor
       const byInstructor: Record<string, {
         name: string;
-        praticas: number;
-        provas: number;
+        praticas_a: number;
+        praticas_b: number;
+        exames_a: number;
+        exames_b: number;
         totalValue: number;
         lessons: any[];
       }> = {};
@@ -52,11 +54,15 @@ export default function InstructorPaymentTab() {
         const instrId = l.instructor_id;
         const instrName = l.employees?.full_name || "—";
         if (!byInstructor[instrId]) {
-          byInstructor[instrId] = { name: instrName, praticas: 0, provas: 0, totalValue: 0, lessons: [] };
+          byInstructor[instrId] = { name: instrName, praticas_a: 0, praticas_b: 0, exames_a: 0, exames_b: 0, totalValue: 0, lessons: [] };
         }
         const entry = byInstructor[instrId];
-        if (l.type === "pratica") entry.praticas++;
-        else entry.provas++;
+        if (l.type === "pratica_a") entry.praticas_a++;
+        else if (l.type === "pratica_b") entry.praticas_b++;
+        else if (l.type === "exame_a") entry.exames_a++;
+        else if (l.type === "exame_b") entry.exames_b++;
+        else if (l.type === "pratica") entry.praticas_b++; // legacy
+        else entry.exames_b++; // legacy prova
         entry.totalValue += Number(l.value);
         entry.lessons.push(l);
       });
@@ -66,7 +72,7 @@ export default function InstructorPaymentTab() {
         .sort((a, b) => b.totalValue - a.totalValue);
 
       const totalGeral = instructors.reduce((s, i) => s + i.totalValue, 0);
-      const totalAulas = instructors.reduce((s, i) => s + i.praticas + i.provas, 0);
+      const totalAulas = instructors.reduce((s, i) => s + i.praticas_a + i.praticas_b + i.exames_a + i.exames_b, 0);
 
       return { instructors, totalGeral, totalAulas };
     },
@@ -149,14 +155,16 @@ export default function InstructorPaymentTab() {
                 <div className="flex items-center justify-between mb-3">
                   <div>
                     <p className="text-sm font-semibold text-foreground">{instr.name}</p>
-                    <div className="flex gap-3 mt-1">
-                      <span className="text-xs text-muted-foreground">{instr.praticas} prática{instr.praticas !== 1 ? "s" : ""}</span>
-                      <span className="text-xs text-muted-foreground">{instr.provas} prova{instr.provas !== 1 ? "s" : ""}</span>
+                    <div className="flex gap-3 mt-1 flex-wrap">
+                      {instr.praticas_a > 0 && <span className="text-xs text-muted-foreground">{instr.praticas_a} prática(s) A</span>}
+                      {instr.praticas_b > 0 && <span className="text-xs text-muted-foreground">{instr.praticas_b} prática(s) B</span>}
+                      {instr.exames_a > 0 && <span className="text-xs text-muted-foreground">{instr.exames_a} exame(s) A</span>}
+                      {instr.exames_b > 0 && <span className="text-xs text-muted-foreground">{instr.exames_b} exame(s) B</span>}
                     </div>
                   </div>
                   <div className="text-right">
                     <p className="text-lg font-display font-bold text-success">{fmt(instr.totalValue)}</p>
-                    <p className="text-[10px] text-muted-foreground">{instr.praticas + instr.provas} aulas</p>
+                    <p className="text-[10px] text-muted-foreground">{instr.praticas_a + instr.praticas_b + instr.exames_a + instr.exames_b} aulas</p>
                   </div>
                 </div>
 
@@ -167,7 +175,9 @@ export default function InstructorPaymentTab() {
                       <div className="flex items-center gap-2">
                         <span className="text-muted-foreground">{fmtDate(l.date)}</span>
                         <span className="text-foreground">{(l as any).students?.full_name || "—"}</span>
-                        <Badge variant="outline" className="text-[9px] h-4">{l.type === "pratica" ? "Prática" : "Prova"}</Badge>
+                        <Badge variant="outline" className="text-[9px] h-4">
+                          {l.type === "pratica_a" ? "Prática A" : l.type === "pratica_b" ? "Prática B" : l.type === "exame_a" ? "Exame A" : l.type === "exame_b" ? "Exame B" : l.type === "pratica" ? "Prática" : "Prova"}
+                        </Badge>
                       </div>
                       <span className="text-foreground font-medium">R$ {Number(l.value).toFixed(2).replace(".", ",")}</span>
                     </div>
