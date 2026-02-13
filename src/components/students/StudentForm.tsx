@@ -45,6 +45,8 @@ export default function StudentForm({ student, onClose }: Props) {
     status: student?.status ?? "ativo",
     course_value: student?.course_value ? String(student.course_value) : "",
     installments_count: student?.installments_count ? String(student.installments_count) : "1",
+    max_lessons_a: student?.max_lessons_a ? String(student.max_lessons_a) : "0",
+    max_lessons_b: student?.max_lessons_b ? String(student.max_lessons_b) : "0",
     notes: student?.notes ?? "",
     is_active: student?.is_active ?? true,
   });
@@ -115,6 +117,8 @@ export default function StudentForm({ student, onClose }: Props) {
         status: form.status,
         course_value: courseValue,
         installments_count: installmentsCount,
+        max_lessons_a: parseInt(form.max_lessons_a) || 0,
+        max_lessons_b: parseInt(form.max_lessons_b) || 0,
         notes: form.notes || null,
         is_active: form.is_active,
         photo_url,
@@ -288,6 +292,24 @@ export default function StudentForm({ student, onClose }: Props) {
               )}
             </div>
           )}
+          {/* Lesson quotas */}
+          <div className="sm:col-span-2">
+            <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3">Quantidade de Aulas Contratadas</h3>
+            <div className="grid grid-cols-2 gap-4">
+              {(form.category === "A" || form.category === "AB") && (
+                <div className="space-y-1">
+                  <Label>Aulas Moto (Cat. A)</Label>
+                  <Input type="number" min="0" value={form.max_lessons_a} onChange={(e) => handleChange("max_lessons_a", e.target.value)} className="bg-input/50" />
+                </div>
+              )}
+              {(form.category === "B" || form.category === "AB") && (
+                <div className="space-y-1">
+                  <Label>Aulas Carro (Cat. B)</Label>
+                  <Input type="number" min="0" value={form.max_lessons_b} onChange={(e) => handleChange("max_lessons_b", e.target.value)} className="bg-input/50" />
+                </div>
+              )}
+            </div>
+          </div>
           <div className="sm:col-span-2 space-y-1">
             <Label>Observações</Label>
             <Textarea value={form.notes} onChange={(e) => handleChange("notes", e.target.value)} className="bg-input/50 min-h-[80px]" />

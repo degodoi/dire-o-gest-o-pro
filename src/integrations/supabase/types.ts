@@ -249,6 +249,8 @@ export type Database = {
           id: string
           installments_count: number
           is_active: boolean
+          max_lessons_a: number
+          max_lessons_b: number
           notes: string | null
           phone: string | null
           photo_url: string | null
@@ -275,6 +277,8 @@ export type Database = {
           id?: string
           installments_count?: number
           is_active?: boolean
+          max_lessons_a?: number
+          max_lessons_b?: number
           notes?: string | null
           phone?: string | null
           photo_url?: string | null
@@ -301,6 +305,8 @@ export type Database = {
           id?: string
           installments_count?: number
           is_active?: boolean
+          max_lessons_a?: number
+          max_lessons_b?: number
           notes?: string | null
           phone?: string | null
           photo_url?: string | null

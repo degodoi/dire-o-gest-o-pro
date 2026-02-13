@@ -40,6 +40,8 @@ export type Student = {
   status: string;
   course_value: number;
   installments_count: number;
+  max_lessons_a: number;
+  max_lessons_b: number;
   notes: string | null;
   is_active: boolean;
   created_at: string;

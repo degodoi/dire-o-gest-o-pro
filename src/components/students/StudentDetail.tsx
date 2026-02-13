@@ -103,6 +103,12 @@ export default function StudentDetail({ student }: { student: Student }) {
         <div className="grid grid-cols-2 gap-4">
           <InfoRow label="Valor do Curso" value={`R$ ${Number(student.course_value).toFixed(2)}`} />
           <InfoRow label="Parcelas" value={String(student.installments_count)} />
+          {(student.category === "A" || student.category === "AB") && (
+            <InfoRow label="Aulas Moto (A)" value={String((student as any).max_lessons_a || 0)} />
+          )}
+          {(student.category === "B" || student.category === "AB") && (
+            <InfoRow label="Aulas Carro (B)" value={String((student as any).max_lessons_b || 0)} />
+          )}
         </div>
 
         {isLoading ? (
