@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/hooks/use-toast";
-import { Plus, Search, Filter, CalendarDays, CheckCircle2, XCircle, Trash2, CalendarClock } from "lucide-react";
+import { Plus, Search, Filter, CalendarDays, CheckCircle2, XCircle, Trash2, CalendarClock, Pencil } from "lucide-react";
 import LessonForm from "@/components/aulas/LessonForm";
 import AdminPasswordDialog from "@/components/AdminPasswordDialog";
 import { useAuth } from "@/contexts/AuthContext";
@@ -201,7 +201,7 @@ export default function AulasListTab() {
                 <Badge variant="outline" className={`text-xs ${statusColors[l.status] ?? ""}`}>
                   {statusLabels[l.status] ?? l.status}
                 </Badge>
-                {l.status === "agendada" && (
+                {(l.status === "agendada" || l.status === "reagendada") && (
                   <div className="flex gap-1">
                     <Button size="icon" variant="ghost" className="h-7 w-7 text-success hover:text-success" title="Marcar como realizada"
                       onClick={() => updateStatusMutation.mutate({ id: l.id, status: "realizada" })}>
@@ -217,6 +217,10 @@ export default function AulasListTab() {
                     </Button>
                   </div>
                 )}
+                <Button size="icon" variant="ghost" className="h-7 w-7 text-muted-foreground hover:text-foreground" title="Editar aula"
+                  onClick={() => { setEditLesson(l); setFormOpen(true); }}>
+                  <Pencil className="w-4 h-4" />
+                </Button>
                 {role === "admin" && (
                   <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10" title="Excluir aula"
                     onClick={() => setDeletingLesson(l)}>
