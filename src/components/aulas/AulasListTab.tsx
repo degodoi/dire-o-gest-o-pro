@@ -151,7 +151,7 @@ export default function AulasListTab() {
           <DialogTrigger asChild>
             <Button size="sm"><Plus className="w-4 h-4 mr-1" />Nova Aula</Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-lg">
+          <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{editLesson ? "Editar" : "Registrar"} Aula</DialogTitle>
             </DialogHeader>

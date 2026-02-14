@@ -278,7 +278,7 @@ export default function Funcionarios() {
 
       {/* Detail Dialog */}
       <Dialog open={!!viewingEmployee} onOpenChange={() => setViewingEmployee(null)}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="font-display">Detalhes do Funcionário</DialogTitle>
           </DialogHeader>
